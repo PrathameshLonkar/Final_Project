@@ -5,17 +5,29 @@ const assert = require('assert');
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const path = require("path");
 const querystring = require('querystring');
-
+//const Media = require('./static/media');
 const mustache = require('mustache');
 const mongo = require('mongodb').MongoClient;
+const multer =  require('multer');
+const gridFsStorage = require('multer-gridfs-storage');
+const grid = require('gridfs-stream');
+const crypto = require('crypto');
 var url = "mongodb+srv://plonkar1:prathamesh@cluster0.rfest.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const mongoose = require('mongoose');
 
 const app = express()
 const port = 3000
 const STATIC_DIR = 'static';
 const TEMPLATES_DIR = 'templates';
 //app.get('/', (req, res) => res.send('Hello World!'))
+
+app.use(bodyParser.json());
+
+app.use(bodyParser.urlencoded({ 
+    extended: true
+}));
 
 app.locals.port = port;
   app.locals.base = "localhost:3000/";
@@ -36,8 +48,11 @@ app.locals.port = port;
   const base = "localhost:3000/";
   app.get(`/text.html`, doText(app));
   app.get(`/InsertText.html`, doAddText(app));
+  app.get(`/Files.html`, DoFile(app));
+
   app.get(`/:id`, doId(app));
-  //app.get(`/comp-district.html`, doCompDistrict(app));
+  
+  
   //app.get(`/Search-a-case.html`, doSearchCase(app));
 
 
@@ -58,7 +73,64 @@ function setupTemplates(app) {
       }
     }
   }
+  const MONGO_OPTIONS = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  };
+  
+  var conn = mongoose.createConnection(url);
+let gfs;
+conn.once('open', ()=> {
+  gfs = grid(conn.db, mongoose.mongo);
+    gfs.collection('uploads');
+    console.log('all set')
+  // all set!
+});
+/*async function doGfs(){
+    console.log('entered dogfs')
+    client= await mongo.connect(url,MONGO_OPTIONS);
+	db=client.db("Paste");
 
+    // make sure the db instance is open before passing into `Grid`
+    
+      gfs = grid(db, mongo);
+      gfs.collection('uploads');
+      //console.log('gfs:',gfs)
+  //      return gfs;
+    
+}
+doGfs();*/
+
+const storage = new gridFsStorage({
+  
+  url: "mongodb+srv://plonkar1:prathamesh@cluster0.rfest.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+  file: (req, file) => {
+    
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        if (err) {
+          return reject(err);
+        }
+        const filename = buf.toString('hex') + path.extname(file.originalname);
+        const fileInfo = {
+          filename: filename,
+          bucketName: 'uploads'
+          
+        };
+        console.log(fileInfo);
+        resolve(fileInfo);
+      });
+    });
+  }
+});
+
+const upload = multer({ storage });
+
+app.post('/InsertFile.html', upload.single('file'), (req, res) => {
+ res.json({ file: req.file });
+ 
+
+});
 function doId(app){
     return async function(req,res){
         var id = req.params.id;
@@ -73,6 +145,7 @@ function doId(app){
                data.text = e.Text;
             }
         })
+        console.log('entering id')
         var template = 'DisplayText';
         let model = {Data:data}  
         const html = doMustache(app, template, model);
@@ -127,12 +200,31 @@ function doAddText(app){
    
     }
 }
+
+function DoFile(app){
+  return async function(req,res){
+    console.log(__dirname +'/static' + '/File.html')
+    console.log("Enteredn dofile");
+        return res.sendFile(__dirname +'/static' + '/File.html');
+  }
+}
+
+function doFiles(app){
+  return async function(req,res){
+    const gfs  =await doGfs();
+    //console.log(gfs)
+    upload.single('myfile')
+    
+    return res.json({ file: req.file });
+      
+    
+    
+    
+  }
+}
+
 function doMustache(app, templateId, view) {
     //const templates = { };
       return mustache.render(app.templates[templateId], view);
     }
 
-const MONGO_OPTIONS = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
