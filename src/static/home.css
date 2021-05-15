@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+@import url('https://fonts.googleapis.com/css?family=Roboto');
 
-<title>Replica of Paste.com</title>
-<style>:root {
+/* Global Styles */
+:root {
   --primary-color: #dc3545;
   --dark-color: #333333;
   --light-color: #f4f4f4;
@@ -199,7 +197,7 @@ img {
 }
 
 .btn {
-  display: flex;
+  display: inline-block;
   background: var(--light-color);
   color: #333;
   padding: 0.4rem 1.3rem;
@@ -209,10 +207,6 @@ img {
   margin-right: 0.5rem;
   transition: opacity 0.2s ease-in;
   outline: none;
-  text-align: center;
-  margin: auto;
-  justify-content:center;
-
 }
 
 .btn-link {
@@ -223,7 +217,7 @@ img {
 
 .btn-block {
   display: block;
-  width: 25%;
+  width: 100%;
 }
 
 .btn-sm {
@@ -418,24 +412,3 @@ table th {
     justify-content: center;
   }
 }
-</style>
-</head>
-<body style= "background:#242323">
-    <nav class='navbar bg-primary'>
-      <a href = '/'><h1 >Replica of PasteBin.com</h1></a>
-    </nav>
-
-    <form method="GET" action="/text.html" class="form"><br>
-      
-      <input type="submit" value="Text" class="btn btn-dark btn-block"/><br>
-      </form>
-<br>
-<form method="GET" action="/media/Files.html" class="form"><br>
-      
-  <input type="submit" value="Media" class ="btn btn-dark btn-block"/><br>
-  </form>
-
-
-</body>
-</html>
-

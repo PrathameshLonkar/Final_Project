@@ -16,11 +16,12 @@ const grid = require('gridfs-stream');
 const crypto = require('crypto');
 var url = "mongodb+srv://plonkar1:prathamesh@cluster0.rfest.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 const mongoose = require('mongoose');
-
+var id = '';
 const app = express()
 const port = 3000
 const STATIC_DIR = 'static';
 const TEMPLATES_DIR = 'templates';
+
 //app.get('/', (req, res) => res.send('Hello World!'))
 
 app.use(bodyParser.json());
@@ -30,7 +31,8 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.locals.port = port;
-  app.locals.base = "localhost:3000/";
+  //app.locals.base = "localhost:3000/";
+  
   //app.locals.model = model;
   //app.use('',express.static(STATIC_DIR));
   process.chdir(__dirname);
@@ -48,7 +50,8 @@ app.locals.port = port;
   const base = "localhost:3000/";
   app.get(`/text.html`, doText(app));
   app.get(`/InsertText.html`, doAddText(app));
-  app.get(`/Files.html`, DoFile(app));
+  app.get(`/media/Files.html`, DoFile(app));
+  app.get(`/media/upload/:id`,doMedia(app));
 
   app.get(`/:id`, doId(app));
   
@@ -112,8 +115,10 @@ const storage = new gridFsStorage({
           return reject(err);
         }
         const filename = buf.toString('hex') + path.extname(file.originalname);
+        id = ID();
         const fileInfo = {
           filename: filename,
+          id:id,
           bucketName: 'uploads'
           
         };
@@ -126,11 +131,40 @@ const storage = new gridFsStorage({
 
 const upload = multer({ storage });
 
-app.post('/InsertFile.html', upload.single('file'), (req, res) => {
- res.json({ file: req.file });
+app.post('/media/upload', upload.single('file'), (req, res) => {
+  console.log(id);
+  console.log(req.file);
+  var template = 'File';
+  let model = {Data:{'id':id}}  
+  const html = doMustache(app, template, model);
+  return res.send(html)
+ //res.json({ file: req.file });
  
 
 });
+
+function doMedia(app){
+  return async function(req,res){
+    var Id = req.params.id;
+
+    gfs.files.findOne({ _id: Id }, (err, file) => {
+      // Check if file
+      if (!file || file.length === 0) {
+        return res.status(404).json({
+          err: 'No file exists'
+        });
+      }
+  
+      // Check if image
+      else{
+        // Read output to browser
+        const readstream = gfs.createReadStream(file.filename);
+        readstream.pipe(res);
+      } 
+    });
+  } 
+}
+
 function doId(app){
     return async function(req,res){
         var id = req.params.id;

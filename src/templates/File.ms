@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-
-<title>Replica of Paste.com</title>
-<style>:root {
+            <html lang="en">
+            <head>
+            <style>:root {
   --primary-color: #dc3545;
   --dark-color: #333333;
   --light-color: #f4f4f4;
@@ -419,23 +417,22 @@ table th {
   }
 }
 </style>
-</head>
-<body style= "background:#242323">
-    <nav class='navbar bg-primary'>
-      <a href = '/'><h1 >Replica of PasteBin.com</h1></a>
-    </nav>
-
-    <form method="GET" action="/text.html" class="form"><br>
-      
-      <input type="submit" value="Text" class="btn btn-dark btn-block"/><br>
-      </form>
-<br>
-<form method="GET" action="/media/Files.html" class="form"><br>
-      
-  <input type="submit" value="Media" class ="btn btn-dark btn-block"/><br>
-  </form>
-
-
-</body>
-</html>
-
+            </head>
+            <body style= "background:#242323">
+            <nav class = "navbar bg-primary">
+               <a href = '/'><h1 >Replica of PasteBin.com</h1></a>
+            </nav>
+              <form action="/media/upload" method="POST" enctype="multipart/form-data">
+                <div>
+                  <input type="file" name="file" id="file" class="custom-file-input">
+                  <label for="file" >Choose File</label>
+                </div>
+                <input type="submit" value="Submit" class="btn btn-dark btn-block" >
+                {{#Data}}
+              <textarea id="Text" name="Text" rows="2" cols="15">{{id}}</textarea>
+              {{/Data}}
+              </form>
+              
+            
+            </body>
+            </html>
